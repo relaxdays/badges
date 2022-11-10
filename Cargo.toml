@@ -1,0 +1,25 @@
+[package]
+name = "badges"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+cli = ["clap"]
+
+[[bin]]
+name = "badges"
+required-features = ["cli"]
+
+[dependencies]
+# always required dependencies
+thiserror = "^1"
+askama = "^0.11"
+
+# dependencies for cli
+clap = { version = "^4", optional = true, features = ["derive"] }
+
+[dev-dependencies]
+pretty_assertions = "^1.3"
