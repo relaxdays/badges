@@ -6,8 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = []
+default = ["font-shape"]
 cli = ["clap"]
+font-shape = ["once_cell", "rustybuzz"]
 
 [[bin]]
 name = "badges"
@@ -17,6 +18,10 @@ required-features = ["cli"]
 # always required dependencies
 thiserror = "^1"
 askama = "^0.11"
+
+# dependencies for font measurement
+once_cell = { version = "^1.16", optional = true }
+rustybuzz = { version = "^0.6", optional = true }
 
 # dependencies for cli
 clap = { version = "^4", optional = true, features = ["derive"] }

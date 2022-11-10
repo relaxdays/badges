@@ -38,6 +38,7 @@ impl<'a> BadgeTemplate<'a> {
         }
     }
 
+    #[cfg(not(feature = "font-shape"))]
     fn measure_text_width(text: &str) -> u16 {
         // todo: improve this heuristic somehow
         let width = text.chars().count() * 8 + 16;
@@ -46,6 +47,11 @@ impl<'a> BadgeTemplate<'a> {
         } else {
             width as _
         }
+    }
+
+    #[cfg(feature = "font-shape")]
+    fn measure_text_width(text: &str) -> u16 {
+        crate::font::measure_text(text)
     }
 }
 

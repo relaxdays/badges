@@ -7,6 +7,8 @@ use std::borrow::Cow;
 use error::BadgeError;
 
 pub mod error;
+#[cfg(feature = "font-shape")]
+mod font;
 mod template;
 
 /// Available badge colors (based on GitLab's colors)
