@@ -1,0 +1,77 @@
+variables:
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/badges"
+  BUILD_DISABLED: 'true'
+
+include:
+  - project: 'templates_gitlab/app_deployment_template'
+    ref: 'feature/security-pages'
+    file: '/auto-devops.template.yaml'
+
+.build:rust:
+  stage: build
+  image: rust:1.65-bullseye
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - rustc -Vv && cargo -Vv
+    - apt-get update && apt-get install -y jq
+    - cargo install cargo-cache --no-default-features --features ci-autoclean
+    - export CARGO_HOME="$(pwd)/.cargo_home"
+    - VERSION="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')"
+    - echo "VERSION=$VERSION" >> build.env
+  after_script:
+    - export CARGO_HOME="$(pwd)/.cargo_home"
+    - cargo-cache
+  cache:
+    paths:
+      - .cargo_home
+      - target
+    key:
+      files:
+        - Cargo.lock
+      prefix: $CI_JOB_NAME
+  artifacts:
+    reports:
+      dotenv: build.env
+
+build:compile:
+  extends: '.build:rust'
+  script:
+    - cargo build --release --locked --features "cli"
+  artifacts:
+    paths:
+      - target/release/badges
+
+build:package:
+  extends: '.build:rust'
+  script:
+    - cargo package --locked --allow-dirty
+  artifacts:
+    paths:
+      - target/package
+
+upload:commit:
+  stage: deploy
+  image: curlimages/curl:latest
+  dependencies:
+    - 'build:compile'
+  script:
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --fail-with-body \
+        --upload-file "target/release/badges" \
+        "${PACKAGE_REGISTRY_URL}/${VERSION}+git.${CI_COMMIT_SHORT_SHA}/badges"
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+upload:tag:
+  stage: deploy
+  image: curlimages/curl:latest
+  dependencies:
+    - 'build:compile'
+  script:
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --fail-with-body \
+        --upload-file "target/release/badges" \
+        "${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/badges"
+  rules:
+    - if: $CI_COMMIT_TAG
