@@ -66,20 +66,20 @@ mod test {
     fn test_flat() {
         let template = BadgeTemplate::new(BadgeStyle::Flat, BadgeColor::Green, "badge", "rendered");
         let rendered = template.render().expect("failed to render template");
-        let expected = r##"<svg xmlns="http://www.w3.org/2000/svg" width="136" height="20">
+        let expected = r##"<svg xmlns="http://www.w3.org/2000/svg" width="131" height="20">
 <linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
-<mask id="a"><rect width="136" height="20" rx="3" fill="#fff"/></mask>
+<mask id="a"><rect width="131" height="20" rx="3" fill="#fff"/></mask>
 <g mask="url(#a)">
-	<rect width="56" height="20" fill="#555"/>
-	<rect x="56" width="80" height="20" fill="#4c1"/>
-	<rect width="136" height="20" fill="url(#b)"/>
+	<rect width="58" height="20" fill="#555"/>
+	<rect x="58" width="73" height="20" fill="#4c1"/>
+	<rect width="131" height="20" fill="url(#b)"/>
 </g>
 
 <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
-	<text x="28" y="15" fill="#010101" fill-opacity=".3">badge</text>
-	<text x="96" y="15" fill="#010101" fill-opacity=".3">rendered</text>
-	<text x="28" y="14">badge</text>
-	<text x="96" y="14">rendered</text>
+	<text x="29" y="15" fill="#010101" fill-opacity=".3">badge</text>
+	<text x="94" y="15" fill="#010101" fill-opacity=".3">rendered</text>
+	<text x="29" y="14">badge</text>
+	<text x="94" y="14">rendered</text>
 </g>
 </svg>"##;
         assert_eq!(rendered, expected);
@@ -94,15 +94,15 @@ mod test {
             "rendered",
         );
         let rendered = template.render().expect("failed to render template");
-        let expected = r##"<svg xmlns="http://www.w3.org/2000/svg" width="136" height="20">
+        let expected = r##"<svg xmlns="http://www.w3.org/2000/svg" width="131" height="20">
 <g shape-rendering="crispEdges">
-	<rect width="56" height="20" fill="#555"/>
-	<rect x="56" width="80" height="20" fill="#4c1"/>
+	<rect width="58" height="20" fill="#555"/>
+	<rect x="58" width="73" height="20" fill="#4c1"/>
 </g>
 
 <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
-	<text x="28" y="14">badge</text>
-	<text x="96" y="14">rendered</text>
+	<text x="29" y="14">badge</text>
+	<text x="94" y="14">rendered</text>
 </g>
 </svg>"##;
         assert_eq!(rendered, expected);
