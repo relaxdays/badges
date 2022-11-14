@@ -1,6 +1,6 @@
 [package]
 name = "badges"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 authors = ["Sophie Tauchert <sophie@999eagle.moe>"]
 license = "MIT OR Apache-2.0"
