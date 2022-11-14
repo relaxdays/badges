@@ -4,7 +4,7 @@ variables:
 
 include:
   - project: 'templates_gitlab/app_deployment_template'
-    ref: 'feature/security-pages'
+    ref: 'staging'
     file: '/auto-devops.template.yaml'
 
 .build:rust:
