@@ -11,7 +11,7 @@ use crate::{BadgeColor, BadgeStyle};
 pub(crate) struct BadgeTemplate<'a> {
     style: BadgeStyle,
     left_width: u16,
-    left_color: &'a str,
+    left_color: Cow<'static, str>,
     left_text: &'a str,
     right_width: u16,
     right_color: Cow<'static, str>,
@@ -21,20 +21,21 @@ pub(crate) struct BadgeTemplate<'a> {
 impl<'a> BadgeTemplate<'a> {
     pub fn new(
         style: BadgeStyle,
-        color: BadgeColor,
-        left_text: &'a str,
-        right_text: &'a str,
+        label: &'a str,
+        label_color: BadgeColor,
+        message: &'a str,
+        message_color: BadgeColor,
     ) -> Self {
-        let left_width = Self::measure_text_width(left_text);
-        let right_width = Self::measure_text_width(right_text);
+        let left_width = Self::measure_text_width(label);
+        let right_width = Self::measure_text_width(message);
         Self {
             style,
             left_width,
-            left_color: "#555", // always choose this default as the "background" color
-            left_text,
+            left_color: label_color.as_hex_str(),
+            left_text: label,
             right_width,
-            right_color: color.as_hex_str(),
-            right_text,
+            right_color: message_color.as_hex_str(),
+            right_text: message,
         }
     }
 
@@ -63,7 +64,13 @@ mod test {
 
     #[test]
     fn test_flat() {
-        let template = BadgeTemplate::new(BadgeStyle::Flat, BadgeColor::Green, "badge", "rendered");
+        let template = BadgeTemplate::new(
+            BadgeStyle::Flat,
+            "badge",
+            BadgeColor::Grey,
+            "rendered",
+            BadgeColor::Green,
+        );
         let rendered = template.render().expect("failed to render template");
         let expected = r##"<svg xmlns="http://www.w3.org/2000/svg" width="131" height="20">
 <linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
@@ -88,9 +95,10 @@ mod test {
     fn test_flat_square() {
         let template = BadgeTemplate::new(
             BadgeStyle::FlatSquare,
-            BadgeColor::Green,
             "badge",
+            BadgeColor::Grey,
             "rendered",
+            BadgeColor::Green,
         );
         let rendered = template.render().expect("failed to render template");
         let expected = r##"<svg xmlns="http://www.w3.org/2000/svg" width="131" height="20">

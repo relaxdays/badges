@@ -8,9 +8,12 @@ struct Cli {
     label: String,
     /// Badge message (right side)
     message: String,
-    /// Badge color
+    /// Background color for the label
     #[arg(short, long, default_value = "grey", value_parser = color_parser())]
-    color: BadgeColor,
+    label_color: BadgeColor,
+    /// Background color for the message
+    #[arg(short, long, default_value = "light-grey", value_parser = color_parser())]
+    message_color: BadgeColor,
     /// Badge style
     #[arg(short, long, default_value = "flat", value_enum)]
     style: BadgeStyle,
@@ -20,9 +23,10 @@ fn main() {
     let cli = Cli::parse();
     let result = BadgeBuilder::new()
         .style(cli.style)
-        .left_text(&cli.label)
-        .right_text(&cli.message)
-        .color(cli.color)
+        .label(&cli.label)
+        .label_color(cli.label_color)
+        .message(&cli.message)
+        .message_color(cli.message_color)
         .render();
     match result {
         Ok(badge) => {

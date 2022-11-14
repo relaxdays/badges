@@ -24,7 +24,9 @@ pub enum BadgeColor {
     Yellow,
     /// Red, #e05d44
     Red,
-    /// Grey, #9f9f9f9
+    /// Light grey, #9f9f9f9
+    LightGrey,
+    /// Grey, #555
     Grey,
     /// A custom color
     CustomRgb(u8, u8, u8),
@@ -48,7 +50,8 @@ impl BadgeColor {
             Self::LightGreen => "#a3c51c".into(),
             Self::Yellow => "#dfb317".into(),
             Self::Red => "#e05d44".into(),
-            Self::Grey => "#9f9f9f".into(),
+            Self::LightGrey => "#9f9f9f".into(),
+            Self::Grey => "#555".into(),
             Self::CustomRgb(r, g, b) => format!("#{:02x}{:02x}{:02x}", r, g, b).into(),
         }
     }
@@ -72,6 +75,7 @@ impl<'a> TryFrom<&'a str> for BadgeColor {
     fn try_from(value: &'a str) -> Result<Self, Self::Error> {
         match value {
             "grey" | "gray" => Ok(Self::Grey),
+            "light-grey" | "light-gray" => Ok(Self::LightGrey),
             "red" => Ok(Self::Red),
             "yellow" => Ok(Self::Yellow),
             "green" => Ok(Self::Green),
@@ -110,9 +114,10 @@ impl<'a> TryFrom<&'a str> for BadgeColor {
 /// Builder for rendering a badge
 pub struct BadgeBuilder<'a> {
     style: BadgeStyle,
-    left_text: &'a str,
-    right_text: &'a str,
+    label: &'a str,
     label_color: BadgeColor,
+    message: &'a str,
+    message_color: BadgeColor,
 }
 
 impl<'a> Default for BadgeBuilder<'a> {
@@ -126,9 +131,10 @@ impl<'a> BadgeBuilder<'a> {
     pub fn new() -> Self {
         Self {
             style: BadgeStyle::Flat,
-            left_text: "badge",
-            right_text: "example",
+            label: "badge",
             label_color: BadgeColor::Grey,
+            message: "example",
+            message_color: BadgeColor::LightGrey,
         }
     }
 
@@ -138,21 +144,27 @@ impl<'a> BadgeBuilder<'a> {
         self
     }
 
-    /// Change the text on the left side of the generated badge
-    pub fn left_text(mut self, text: &'a str) -> Self {
-        self.left_text = text;
+    /// Change the label text of the generated badge
+    pub fn label(mut self, text: &'a str) -> Self {
+        self.label = text;
         self
     }
 
-    /// Change the text on the right side of the generated badge
-    pub fn right_text(mut self, text: &'a str) -> Self {
-        self.right_text = text;
-        self
-    }
-
-    /// Change the background color of the right side of the generated badge
-    pub fn color(mut self, color: BadgeColor) -> Self {
+    /// Change the label background color of the generated badge
+    pub fn label_color(mut self, color: BadgeColor) -> Self {
         self.label_color = color;
+        self
+    }
+
+    /// Change the message text of the generated badge
+    pub fn message(mut self, text: &'a str) -> Self {
+        self.message = text;
+        self
+    }
+
+    /// Change the message background color of the generated badge
+    pub fn message_color(mut self, color: BadgeColor) -> Self {
+        self.message_color = color;
         self
     }
 
@@ -162,9 +174,10 @@ impl<'a> BadgeBuilder<'a> {
 
         let badge = template::BadgeTemplate::new(
             self.style,
+            self.label,
             self.label_color,
-            self.left_text,
-            self.right_text,
+            self.message,
+            self.message_color,
         );
         Ok(badge.render()?)
     }
