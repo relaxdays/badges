@@ -8,6 +8,7 @@ description = "A pure Rust library for generating SVG badges with an included bi
 keywords = ["svg", "badge"]
 categories = ["visualization", "command-line-utilities"]
 repository = "https://github.com/relaxdays/badges"
+documentation = "https://docs.rs/badges"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
