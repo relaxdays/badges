@@ -4,6 +4,9 @@ version = "0.3.0"
 edition = "2021"
 authors = ["Sophie Tauchert <sophie@999eagle.moe>"]
 license = "MIT OR Apache-2.0"
+description = "A pure Rust library for generating SVG badges with an included binary"
+keywords = ["svg", "badge"]
+categories = ["visualization", "command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
