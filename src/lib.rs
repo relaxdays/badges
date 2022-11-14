@@ -15,7 +15,7 @@ mod template;
 #[derive(Clone, Debug, PartialEq, Eq)]
 // unused variants are here for possible future use
 #[allow(dead_code)]
-pub enum BadgeColor<'a> {
+pub enum BadgeColor {
     /// Green, #4c1
     Green,
     /// Light green, #a3c51c
@@ -27,9 +27,7 @@ pub enum BadgeColor<'a> {
     /// Grey, #9f9f9f9
     Grey,
     /// A custom color
-    ///
-    /// Must be a valid color in hexadecimal rgb format
-    Custom(Cow<'a, str>),
+    CustomRgb(u8, u8, u8),
 }
 
 /// The style of a badge
@@ -42,47 +40,33 @@ pub enum BadgeStyle {
     FlatSquare,
 }
 
-impl<'a> BadgeColor<'a> {
+impl BadgeColor {
     /// Get the hex value of this color
-    pub fn as_str<'b: 'a>(&'b self) -> &'b str {
-        match self {
-            Self::Green => "#4c1",
-            Self::LightGreen => "#a3c51c",
-            Self::Yellow => "#dfb317",
-            Self::Red => "#e05d44",
-            Self::Grey => "#9f9f9f",
-            Self::Custom(color) => color.as_ref(),
-        }
-    }
-
-    /// Get a [`Cow`] of the contained color
-    pub fn into_cow(self) -> Cow<'a, str> {
+    pub fn as_hex_str(&self) -> Cow<'static, str> {
         match self {
             Self::Green => "#4c1".into(),
             Self::LightGreen => "#a3c51c".into(),
             Self::Yellow => "#dfb317".into(),
             Self::Red => "#e05d44".into(),
             Self::Grey => "#9f9f9f".into(),
-            Self::Custom(color) => color,
+            Self::CustomRgb(r, g, b) => format!("#{:02x}{:02x}{:02x}", r, g, b).into(),
         }
     }
 
-    /// Convert this [`BadgeColor`] into one with a `'static` lifetime
-    ///
-    /// Inner data is cloned if necessary.
-    pub fn into_static(self) -> BadgeColor<'static> {
-        match self {
-            Self::Green => BadgeColor::Green,
-            Self::LightGreen => BadgeColor::LightGreen,
-            Self::Yellow => BadgeColor::Yellow,
-            Self::Red => BadgeColor::Red,
-            Self::Grey => BadgeColor::Grey,
-            Self::Custom(cow) => BadgeColor::Custom(Cow::Owned(cow.into_owned())),
+    /// Helper function for parsing
+    fn parse_hex_color(color: &str) -> Result<u8, ()> {
+        let byte = u8::from_str_radix(color, 16).map_err(|_| ())?;
+        if color.len() == 1 {
+            Ok(byte * 16 + byte)
+        } else if color.len() == 2 {
+            Ok(byte)
+        } else {
+            Err(())
         }
     }
 }
 
-impl<'a> TryFrom<&'a str> for BadgeColor<'a> {
+impl<'a> TryFrom<&'a str> for BadgeColor {
     type Error = BadgeError;
 
     fn try_from(value: &'a str) -> Result<Self, Self::Error> {
@@ -96,13 +80,28 @@ impl<'a> TryFrom<&'a str> for BadgeColor<'a> {
                 let Some(hex_color) = value.strip_prefix('#') else {
                     return Err(BadgeError::InvalidColor(value.to_string()))
                 };
-                if hex_color.len() != 3 && hex_color.len() != 6 {
-                    return Err(BadgeError::InvalidColor(value.to_string()));
-                }
-                if hex_color.contains(|c: char| !c.is_ascii_hexdigit()) {
-                    return Err(BadgeError::InvalidColor(value.to_string()));
-                }
-                Ok(Self::Custom(Cow::Borrowed(value)))
+                let (r, g, b) = match hex_color.len() {
+                    3 => {
+                        let r = Self::parse_hex_color(&hex_color[0..=0])
+                            .map_err(|_| BadgeError::invalid_color(value))?;
+                        let g = Self::parse_hex_color(&hex_color[1..=1])
+                            .map_err(|_| BadgeError::invalid_color(value))?;
+                        let b = Self::parse_hex_color(&hex_color[2..=2])
+                            .map_err(|_| BadgeError::invalid_color(value))?;
+                        (r, g, b)
+                    }
+                    6 => {
+                        let r = Self::parse_hex_color(&hex_color[0..=1])
+                            .map_err(|_| BadgeError::invalid_color(value))?;
+                        let g = Self::parse_hex_color(&hex_color[2..=3])
+                            .map_err(|_| BadgeError::invalid_color(value))?;
+                        let b = Self::parse_hex_color(&hex_color[4..=5])
+                            .map_err(|_| BadgeError::invalid_color(value))?;
+                        (r, g, b)
+                    }
+                    _ => return Err(BadgeError::InvalidColor(value.to_string())),
+                };
+                Ok(Self::CustomRgb(r, g, b))
             }
         }
     }
@@ -113,7 +112,7 @@ pub struct BadgeBuilder<'a> {
     style: BadgeStyle,
     left_text: &'a str,
     right_text: &'a str,
-    label_color: BadgeColor<'a>,
+    label_color: BadgeColor,
 }
 
 impl<'a> BadgeBuilder<'a> {
@@ -146,7 +145,7 @@ impl<'a> BadgeBuilder<'a> {
     }
 
     /// Change the background color of the right side of the generated badge
-    pub fn color(mut self, color: BadgeColor<'a>) -> Self {
+    pub fn color(mut self, color: BadgeColor) -> Self {
         self.label_color = color;
         self
     }
@@ -206,16 +205,38 @@ mod test {
         BadgeColor::try_from("#aaaaa").expect_err("parsing should have failed");
         BadgeColor::try_from("#aaaaag").expect_err("parsing should have failed");
         assert_eq!(
-            BadgeColor::Custom(Cow::Borrowed("#aaaaaa")),
+            BadgeColor::CustomRgb(170, 170, 170),
             BadgeColor::try_from("#aaaaaa").expect("failed to parse")
         );
         assert_eq!(
-            BadgeColor::Custom(Cow::Borrowed("#aaa")),
+            BadgeColor::CustomRgb(170, 170, 170),
             BadgeColor::try_from("#aaa").expect("failed to parse")
         );
         assert_eq!(
-            BadgeColor::Custom(Cow::Borrowed("#abcdef")),
+            BadgeColor::CustomRgb(171, 205, 239),
             BadgeColor::try_from("#abcdef").expect("failed to parse")
+        );
+    }
+
+    #[test]
+    fn test_as_str() {
+        assert_eq!(
+            "#aaaaaa",
+            BadgeColor::try_from("#aaaaaa")
+                .expect("failed to parse")
+                .as_hex_str(),
+        );
+        assert_eq!(
+            "#aaaaaa",
+            BadgeColor::try_from("#AAA")
+                .expect("failed to parse")
+                .as_hex_str(),
+        );
+        assert_eq!(
+            "#010203",
+            BadgeColor::try_from("#010203")
+                .expect("failed to parse")
+                .as_hex_str(),
         );
     }
 }

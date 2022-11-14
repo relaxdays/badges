@@ -10,7 +10,7 @@ struct Cli {
     message: String,
     /// Badge color
     #[arg(short, long, default_value = "grey", value_parser = color_parser())]
-    color: BadgeColor<'static>,
+    color: BadgeColor,
     /// Badge style
     #[arg(short, long, default_value = "flat", value_enum)]
     style: BadgeStyle,
@@ -36,6 +36,5 @@ fn main() {
 }
 
 fn color_parser() -> impl clap::builder::TypedValueParser {
-    clap::builder::StringValueParser::new()
-        .try_map(|v| BadgeColor::try_from(v.as_str()).map(BadgeColor::into_static))
+    clap::builder::StringValueParser::new().try_map(|v| BadgeColor::try_from(v.as_str()))
 }

@@ -18,3 +18,9 @@ impl From<askama::Error> for BadgeError {
         Self::RenderError(e)
     }
 }
+
+impl BadgeError {
+    pub(crate) fn invalid_color(value: &str) -> Self {
+        Self::InvalidColor(value.to_string())
+    }
+}

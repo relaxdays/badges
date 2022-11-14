@@ -14,14 +14,14 @@ pub(crate) struct BadgeTemplate<'a> {
     left_color: &'a str,
     left_text: &'a str,
     right_width: u16,
-    right_color: Cow<'a, str>,
+    right_color: Cow<'static, str>,
     right_text: &'a str,
 }
 
 impl<'a> BadgeTemplate<'a> {
     pub fn new(
         style: BadgeStyle,
-        color: BadgeColor<'a>,
+        color: BadgeColor,
         left_text: &'a str,
         right_text: &'a str,
     ) -> Self {
@@ -33,7 +33,7 @@ impl<'a> BadgeTemplate<'a> {
             left_color: "#555", // always choose this default as the "background" color
             left_text,
             right_width,
-            right_color: color.into_cow(),
+            right_color: color.as_hex_str(),
             right_text,
         }
     }
