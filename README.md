@@ -2,6 +2,24 @@
 
 A small library to render badges. Includes a binary for command line usage.
 
+## Example
+
+```rust
+use badges::{BadgeBuilder, BadgeColor, BadgeStyle};
+
+let badge_svg = BadgeBuilder::new()
+	.style(BadgeStyle::Flat)
+	.label("badge")
+	.message("rendered")
+	.message_color(BadgeColor::Green)
+	.render()
+	.expect("failed to render badge");
+```
+
+## Command Line Usage
+
+Install with `cargo install badges --features cli`. Use with `badges 'label' 'message' --label-color grey --message-color green > badge.svg`.
+
 ## License
 
 Licensed under either of
