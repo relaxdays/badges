@@ -40,7 +40,6 @@ impl<'a> BadgeTemplate<'a> {
 
     #[cfg(not(feature = "font-shape"))]
     fn measure_text_width(text: &str) -> u16 {
-        // todo: improve this heuristic somehow
         let width = text.chars().count() * 8 + 16;
         if width > u16::MAX as _ {
             u16::MAX

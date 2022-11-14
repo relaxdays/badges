@@ -115,6 +115,12 @@ pub struct BadgeBuilder<'a> {
     label_color: BadgeColor,
 }
 
+impl<'a> Default for BadgeBuilder<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> BadgeBuilder<'a> {
     /// Create a new default [`BadgeBuilder`]
     pub fn new() -> Self {
