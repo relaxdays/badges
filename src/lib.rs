@@ -1,4 +1,5 @@
 //! A small library for generating badge svg images
+//! 
 //! ## Example
 //! 
 //! ```rust
